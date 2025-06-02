@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../services/location_service.dart';
-import 'booking_confirmation_screen.dart';
 
 class RideHailingScreen extends StatefulWidget {
   final String? destination;

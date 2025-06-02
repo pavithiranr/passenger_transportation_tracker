@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../services/gtfs_realtime_service.dart';
-import 'dart:async';
 
 class TrainRealtimeScreen extends StatefulWidget {
   const TrainRealtimeScreen({super.key});
