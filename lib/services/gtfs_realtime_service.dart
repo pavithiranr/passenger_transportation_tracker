@@ -2,7 +2,7 @@ import 'package:http/http.dart' as http;
 import '../protos/gtfs-realtime.pb.dart';
 
 class GtfsRealtimeService {
-  final String apiUrl = 'https://api.data.gov.my/gtfs-realtime/vehicle-position/ktmb';
+  final String apiUrl = 'https://api.data.gov.my/gtfs-realtime/vehicle-position/prasarana?category=rapid-rail-kl';
 
   Future<List<FeedEntity>> fetchVehiclePositions() async {
     try {

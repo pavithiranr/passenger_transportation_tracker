@@ -1,34 +1,62 @@
+import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'prasarana_api_service.dart';
 
 class BusTrackingService {
-  final String baseUrl = 'https://api.data.gov.my/gtfs-realtime/vehicle-position/prasarana?category=rapid-bus-kl';
+  final PrasaranaApiService _api = PrasaranaApiService();
 
   Future<List<Map<String, dynamic>>> fetchBusPositions() async {
     try {
-      final response = await http.get(Uri.parse(baseUrl));
-      print('Response status: ${response.statusCode}');
-      
-      if (response.statusCode == 200) {
-        // For now, return mock data until we properly implement the protobuf parsing
-        return [
-          {
-            'id': 'Bus001',
-            'latitude': 3.1390,
-            'longitude': 101.6869,
-          },
-          {
-            'id': 'Bus002',
-            'latitude': 3.1500,
-            'longitude': 101.7000,
-          },
-        ];
-      } else {
-        print('Failed to fetch bus positions: ${response.statusCode}');
-        throw Exception('Failed to load bus positions');
-      }
+      return await _api.fetchBusPositions();
     } catch (e) {
       print('Error fetching bus positions: $e');
-      throw Exception('Error fetching bus positions: $e');
+      // Fallback to mock data if API fails
+      return [
+        {
+          'id': 'B1001',
+          'latitude': 3.1390,
+          'longitude': 101.6869,
+          'route': 'T461',
+          'destination': 'KL Sentral',
+        },
+        {
+          'id': 'B1002',
+          'latitude': 3.1516,
+          'longitude': 101.7155,
+          'route': 'T462',
+          'destination': 'Titiwangsa',
+        },
+        {
+          'id': 'B1003',
+          'latitude': 3.1207,
+          'longitude': 101.6748,
+          'route': 'T463',
+          'destination': 'Mid Valley',
+        },
+      ];
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> getBusSchedule(String route) async {
+    try {
+      await Future.delayed(const Duration(seconds: 1)); // Simulated API delay
+      return [
+        {
+          'departure': '08:00',
+          'arrival': '08:45',
+          'route': route,
+          'status': 'On Time',
+        },
+        {
+          'departure': '08:30',
+          'arrival': '09:15',
+          'route': route,
+          'status': 'Delayed',
+        },
+      ];
+    } catch (e) {
+      print('Error fetching bus schedule: $e');
+      return [];
     }
   }
 }

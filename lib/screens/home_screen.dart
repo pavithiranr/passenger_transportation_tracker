@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'bus/bus_schedule_screen.dart';
 import 'train/train_schedule_screen.dart';
-import 'train/train_realtime_screen.dart';
+import 'bus/bus_schedule_screen.dart';
+import 'bus/bus_tracking_screen.dart';
 import 'ride_hailing/ride_hailing_screen.dart';
+import '../utils/station_formatter.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,158 +15,172 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _startController = TextEditingController();
   final _destinationController = TextEditingController();
+  List<StationInfo> filteredStartStations = [];
+  List<StationInfo> filteredDestStations = [];
+  bool showStartSuggestions = false;
+  bool showDestSuggestions = false;
 
-  @override
-  void dispose() {
-    _startController.dispose();
-    _destinationController.dispose();
-    super.dispose();
-  }
-
-  void _navigateToMode(String mode) {
-    switch (mode) {
-      case 'bus':
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => BusScheduleScreen(
-              start: _startController.text,
-              destination: _destinationController.text,
-            ),
+  Widget _buildSuggestionsList(final List<StationInfo> stations, final TextEditingController controller, final bool isStart) {
+    return Container(
+      constraints: const BoxConstraints(maxHeight: 250),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.5),
+            spreadRadius: 1,
+            blurRadius: 4,
           ),
-        );
-        break;
-      case 'train':
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => TrainScheduleScreen(
-              start: _startController.text,
-              destination: _destinationController.text,
-            ),
-          ),
-        );
-        break;
-      case 'realtime':
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const TrainRealtimeScreen(),
-          ),
-        );
-        break;
-      case 'ride':
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => RideHailingScreen(
-              destination: _destinationController.text,
-            ),
-          ),
-        );
-        break;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Transportation Tracker'),
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _startController,
-              decoration: const InputDecoration(
-                labelText: 'Starting Point',
-                hintText: 'Enter starting location',
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _destinationController,
-              decoration: const InputDecoration(
-                labelText: 'Destination',
-                hintText: 'Enter destination',
-              ),
-            ),
-            const SizedBox(height: 32),
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                children: [
-                  _TransportCard(
-                    icon: Icons.directions_bus,
-                    title: 'Bus Schedule',
-                    color: Colors.green,
-                    onTap: () => _navigateToMode('bus'),
-                  ),
-                  _TransportCard(
-                    icon: Icons.train,
-                    title: 'Train Schedule',
-                    color: Colors.blue,
-                    onTap: () => _navigateToMode('train'),
-                  ),
-                  _TransportCard(
-                    icon: Icons.access_time,
-                    title: 'Real-time Tracking',
-                    color: Colors.orange,
-                    onTap: () => _navigateToMode('realtime'),
-                  ),
-                  _TransportCard(
-                    icon: Icons.local_taxi,
-                    title: 'Book a Ride',
-                    color: Colors.purple,
-                    onTap: () => _navigateToMode('ride'),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+      child: ListView.builder(
+        shrinkWrap: true,
+        itemCount: stations.length,
+        itemBuilder: (final context, final index) {
+          final station = stations[index];
+          return ListTile(
+            title: StationFormatter.buildStationWithLines(station),
+            onTap: () {
+              setState(() {
+                controller.text = station.name;
+                if (isStart) {
+                  showStartSuggestions = false;
+                } else {
+                  showDestSuggestions = false;
+                }
+              });
+            },
+          );
+        },
       ),
     );
   }
-}
-
-class _TransportCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _TransportCard({
-    required this.icon,
-    required this.title,
-    required this.color,
-    required this.onTap,
-  });
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 4,
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 48, color: color),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+  Widget build(final BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Transit App'),
+        shadowColor: Colors.black,
+        backgroundColor: const Color.fromARGB(255, 170, 23, 255),
+        centerTitle: true,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            top: 16.0,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16.0,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Column(
+                children: [
+                  TextField(
+                    controller: _startController,
+                    decoration: const InputDecoration(
+                      labelText: 'Starting Location',
+                      prefixIcon: Icon(Icons.location_on),
+                      hintText: 'e.g., KL Sentral',
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (final value) {
+                      setState(() {
+                        filteredStartStations = StationFormatter.getStationWithLines(value);
+                        showStartSuggestions = value.isNotEmpty;
+                      });
+                    },
+                  ),
+                  if (showStartSuggestions)
+                    _buildSuggestionsList(filteredStartStations, _startController, true),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              Column(
+                children: [
+                  TextField(
+                    controller: _destinationController,
+                    decoration: const InputDecoration(
+                      labelText: 'Destination',
+                      prefixIcon: Icon(Icons.location_on_outlined),
+                      hintText: 'e.g., Masjid Jamek',
+                      border: OutlineInputBorder(),
+                    ),
+                    onChanged: (final value) {
+                      setState(() {
+                        filteredDestStations = StationFormatter.getStationWithLines(value);
+                        showDestSuggestions = value.isNotEmpty;
+                      });
+                    },
+                  ),
+                  if (showDestSuggestions)
+                    _buildSuggestionsList(filteredDestStations, _destinationController, false),
+                ],
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton.icon(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => TrainScheduleScreen(
+                    start: _startController.text,
+                    destination: _destinationController.text,
+                  ),),
+                ),
+                icon: const Icon(Icons.train),
+                label: const Text('Train Schedule & Location'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.all(16),
+                  backgroundColor: Colors.indigo,
+                ),
+              ),
+              const SizedBox(height: 16),              ElevatedButton.icon(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => BusScheduleScreen(
+                    start: _startController.text,
+                    destination: _destinationController.text,
+                  ),),
+                ),
+                icon: const Icon(Icons.directions_bus),
+                label: const Text('Bus Schedule'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.all(16),
+                  backgroundColor: Colors.indigo,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const BusTrackingScreen(
+                    start: 'Current Location',
+                    destination: 'Nearby Buses',
+                  ),),
+                ),
+                icon: const Icon(Icons.map),
+                label: const Text('Live Bus Locations'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.all(16),
+                  backgroundColor: Colors.blue,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RideHailingScreen()),
+                ),
+                icon: const Icon(Icons.local_taxi),
+                label: const Text('Ride Hailing Services'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.all(16),
+                  backgroundColor: Colors.indigo,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

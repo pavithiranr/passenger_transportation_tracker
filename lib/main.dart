@@ -12,9 +12,8 @@ class MyApp extends StatelessWidget {
   Widget build(final BuildContext context) {
     return MaterialApp(
       title: 'Transportation Tracker',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
+      debugShowCheckedModeBanner: false,      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         inputDecorationTheme: const InputDecorationTheme(
           border: OutlineInputBorder(),
           filled: true,
@@ -22,9 +21,13 @@ class MyApp extends StatelessWidget {
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.indigo,
+            backgroundColor: Colors.blue,
             foregroundColor: Colors.white,
           ),
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
         ),
         useMaterial3: true,
       ),
